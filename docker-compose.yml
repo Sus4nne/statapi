@@ -1,0 +1,61 @@
+version: "3.7"
+
+services:
+  #service 1: definition of mysql database
+  db:
+    image: mysql:5.7
+    container_name: mysql-standalone
+    volumes:
+      - "./sql_schema.sql:/docker-entrypoint-initdb.d/1.sql"
+      - "./sql_data.sql:/docker-entrypoint-initdb.d/2.sql"
+#    - statapi-mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: myapi
+      MYSQL_ROOT_PASSWORD: Welkom@123
+      MYSQL_USER: susanne
+      MYSQL_PASSWORD: Welkom@123
+    restart: always
+
+#  #service 2: definition fo phpMyAdmin
+#  phpmyadmin:
+#    image: phpmyadmin/phpmyadmin:latest
+#    container_name: my-php-myadmin
+#    ports:
+#      - "8082:80"
+#    restart: always
+#
+#    depends_on:
+#      - db
+#    environment:
+#      SPRING_DATASOURCE_USERNAME: susanne
+#      SPRING_DATASOURCE_PASSWORD: Welkom@123
+#      MYSQL_DATABASE: myapi
+#      MYSQL_ROOT_PASSWORD: Welkom@123
+#      MYSQL_USER: susanne
+#      MYSQL_PASSWORD: Welkom@123
+
+  #service 3: definition of spring-boot app
+  statsapp:
+    container_name: stats-app
+    image: statapi:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-standalone:3306/myapi?createDatabaseIfNotExists=true&useTimezone=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: susanne
+      SPRING_DATASOURCE_PASSWORD: Welkom@123
+      MYSQL_DATABASE: myapi
+      MYSQL_ROOT_PASSWORD: Welkom@123
+      MYSQL_USER: susanne
+      MYSQL_PASSWORD: Welkom@123
+#    command: sh -c './wait-for db:3306 -- echo "MySQL is ready" '
+#    depends_on:
+#      - db
+    restart: always
+
+
+#volumes:
+#  statapi-mysql-data:
